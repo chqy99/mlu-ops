@@ -13715,6 +13715,25 @@ mluOpDiffIouRotatedSortVerticesForward(mluOpHandle_t handle,
                                        const mluOpTensorDescriptor_t idx_desc,
                                        void *idx);
 
+mluOpStatus_t MLUOP_WIN_API
+mluOpAdd(mluOpHandle_t handle,
+         const mluOpTensorDescriptor_t x_desc,
+         const void *x,
+         const mluOpTensorDescriptor_t y_desc,
+         const void *y,
+         const float alpha,
+         const mluOpTensorDescriptor_t output_desc,
+         void *output);
+
+mluOpStatus_t MLUOP_WIN_API
+mluOpDotProduct(mluOpHandle_t handle,
+                const mluOpTensorDescriptor_t x_desc,
+                const void *x,
+                const mluOpTensorDescriptor_t y_desc,
+                const void *y,
+                const mluOpTensorDescriptor_t output_desc,
+                void *output);
+
 #if defined(__cplusplus)
 }
 #endif
