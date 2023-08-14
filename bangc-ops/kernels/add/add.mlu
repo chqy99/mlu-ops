@@ -1,0 +1,100 @@
+/*************************************************************************
+ * Copyright (C) [2022] by Cambricon, Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+ * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *************************************************************************/
+#include "add.h"
+
+#include <string>
+
+#include "core/context.h"
+#include "core/logging.h"
+#include "core/runtime/device.h"
+#include "core/tensor.h"
+#include "core/type.h"
+#include "kernels/kernel.h"
+#include "mlu_op.h"
+
+void PolicyFuncAdd(const mluOpHandle_t &handle,
+                   const mluOpTensorDescriptor_t &desc, cnrtDim3_t *k_dim,
+                   cnrtFunctionType_t *k_type) {
+  size_t union_number = mluop::runtime::getClusterLimitCapability(handle);
+  size_t core_in_cluster = handle->core_num_per_cluster;
+
+  *k_type = CNRT_FUNC_TYPE_UNION1;
+  k_dim->x = core_in_cluster;
+  k_dim->y = union_number;
+  k_dim->z = 1;
+}
+
+mluOpStatus_t MLUOP_WIN_API mluOpAdd(mluOpHandle_t handle,
+                                     const mluOpTensorDescriptor_t x_desc,
+                                     const void *x,
+                                     const mluOpTensorDescriptor_t y_desc,
+                                     const void *y,
+                                     const float alpha,
+                                     const mluOpTensorDescriptor_t output_desc,
+                                     void *output) {
+  // 1. 检查输入是否为空，以及数据类型、layout、shape等是否符合要求
+  PARAM_CHECK("[mluOpAdd]", handle != nullptr);
+  PARAM_CHECK("[mluOpAdd]", x_desc != nullptr);
+  PARAM_CHECK("[mluOpAdd]", y_desc != nullptr);
+  PARAM_CHECK("[mluOpAdd]", output_desc != nullptr);
+  PARAM_CHECK("[mluOpAdd]", y_desc->dtype == x_desc->dtype);
+  PARAM_CHECK("[mluOpAdd]", output_desc->dtype == x_desc->dtype);
+
+  if (y_desc->dim != x_desc->dim || output_desc->dim != x_desc->dim) {
+    LOG(ERROR) << "[mluOpAdd] Dimension num of x, y and output should be equal."
+               << " But now x.dim is " << x_desc->dim
+               << ", y.dim is " << y_desc->dim
+               << ", output.dim is " << output_desc->dim << ".";
+    return MLUOP_STATUS_BAD_PARAM;
+  }
+
+  // 2. 0元素检查，此处返回 MLUOP_STATUS_SUCCESS
+  if (mluOpGetTensorElementNum(x_desc) == 0 ||
+      mluOpGetTensorElementNum(y_desc) == 0 ||
+      mluOpGetTensorElementNum(output_desc) == 0 ) {
+    VLOG(5) << "[mluOpAdd] Skip zero element tensor.";
+    return MLUOP_STATUS_SUCCESS;
+  }
+
+  // 3, check ptr
+  PARAM_CHECK("[mluOpAdd]", x != nullptr);
+  PARAM_CHECK("[mluOpAdd]", y != nullptr);
+  PARAM_CHECK("[mluOpAdd]", output != nullptr);
+
+  // 4. Choose the best task dimension.
+  /* 拆分策略判断，也可以包成一个小函数，其中:
+      - k_dim表示该task的taskDim，
+      - k_type表示job的类型(BLOCK, U1, U2, U4等等)。
+      - 若将k_type设置为CNRT_FUNC_TYPE_UNION1，即U1任务，一个U1对应一个cluster。 */
+  cnrtDim3_t k_dim;
+  cnrtFunctionType_t k_type;
+  PolicyFuncAdd(handle, x_desc, &k_dim, &k_type);
+
+  // 5. lunch kernel
+  const int32_t element_num = mluOpGetTensorElementNum(x_desc);
+  VLOG(5) << "[mluOpAdd] launch kernel policyFUnc[" << k_dim.x
+          << ", " << k_dim.y << ", " << k_dim.z << "]";
+  KERNEL_CHECK((MLUKernelAdd<<<k_dim, k_type, handle->queue>>>
+               ((float *)x, (float *)y, element_num, alpha, (float *)output)));
+  return MLUOP_STATUS_SUCCESS;
+}
