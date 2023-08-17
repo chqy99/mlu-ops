@@ -23,14 +23,12 @@
 #ifndef KERNELS_DOT_PRODUCT_DOT_PRODUCT_H_
 #define KERNELS_DOT_PRODUCT_DOT_PRODUCT_H_
 
-__mlu_global__ void MLUKernelDotProduct(const float *x,
-                                        const float *y,
-                                        const int32_t element_num,
-                                        float *output);
+#include "mlu_op.h"
 
-__mlu_global__ void MLUKernelDotProduct(const half *x,
-                                        const half *y,
-                                        const int32_t element_num,
-                                        half *output);
+mluOpStatus_t MLUOP_WIN_API
+KernelDotProduct(const cnrtDim3_t k_dim, const cnrtFunctionType_t k_type,
+                 const cnrtQueue_t queue, const mluOpDataType_t d_type,
+                 const void *x, const void *y, const int32_t element_num,
+                 void *output);
 
 #endif

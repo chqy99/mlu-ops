@@ -31,17 +31,16 @@
 #include "core/type.h"
 #include "kernels/kernel.h"
 #include "mlu_op.h"
-#include "kernels/fill_zero/fill_zero.h"
 
 void PolicyFuncAdd(const mluOpHandle_t &handle,
                    const mluOpTensorDescriptor_t &desc, cnrtDim3_t *k_dim,
                    cnrtFunctionType_t *k_type) {
-  // size_t union_number = mluop::runtime::getClusterLimitCapability(handle);
+  size_t union_number = mluop::runtime::getClusterLimitCapability(handle);
   size_t core_in_cluster = handle->core_num_per_cluster;
 
   *k_type = CNRT_FUNC_TYPE_UNION1;
   k_dim->x = core_in_cluster;
-  k_dim->y = 1;  // union_number;
+  k_dim->y = union_number;  // union_number;
   k_dim->z = 1;
 }
 
@@ -90,7 +89,7 @@ mluOpStatus_t MLUOP_WIN_API mluOpDotProduct(mluOpHandle_t handle,
   const int32_t element_num = mluOpGetTensorElementNum(x_desc);
   VLOG(5) << "[mluOpDotProduct] launch kernel policyFUnc[" << k_dim.x
           << ", " << k_dim.y << ", " << k_dim.z << "]";
-  KERNEL_CHECK((MLUKernelDotProduct<<<k_dim, k_type, handle->queue>>>
-               ((float *)x, (float *)y, element_num, (float *)output)));
+  CHECK_RETURN("[mluOpDotProduct] ", KernelDotProduct(k_dim, k_type,
+               handle->queue, x_desc->dtype, x, y, element_num, output));
   return MLUOP_STATUS_SUCCESS;
 }
