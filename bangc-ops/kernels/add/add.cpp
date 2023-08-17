@@ -94,7 +94,7 @@ mluOpStatus_t MLUOP_WIN_API mluOpAdd(mluOpHandle_t handle,
   const int32_t element_num = mluOpGetTensorElementNum(x_desc);
   VLOG(5) << "[mluOpAdd] launch kernel policyFUnc[" << k_dim.x
           << ", " << k_dim.y << ", " << k_dim.z << "]";
-  KERNEL_CHECK((MLUKernelAdd<<<k_dim, k_type, handle->queue>>>
-               ((float *)x, (float *)y, element_num, alpha, (float *)output)));
+  KernelAdd(k_dim, k_type, handle->queue,
+            (float *)x, (float *)y, element_num, alpha, (float *)output);
   return MLUOP_STATUS_SUCCESS;
 }

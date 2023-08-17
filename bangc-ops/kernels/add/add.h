@@ -23,9 +23,12 @@
 #ifndef KERNELS_ADD_ADD_H_
 #define KERNELS_ADD_ADD_H_
 
-__mlu_global__ void MLUKernelAdd(const float *x,
-                                 const float *y,
-                                 const int32_t element_num,
-                                 const float alpha,
-                                 float *output);
+#include "mlu_op.h"
+
+void MLUOP_WIN_API
+KernelAdd(const cnrtDim3_t k_dim, const cnrtFunctionType_t k_type,
+          const cnrtQueue_t queue, const float *x,
+          const float *y, const int32_t element_num,
+          const float alpha, float *output);
+
 #endif  // KERNELS_ADD_ADD_H_

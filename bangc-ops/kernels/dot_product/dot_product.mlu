@@ -1,0 +1,81 @@
+/*************************************************************************
+ * Copyright (C) [2023] by Cambricon, Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+ * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *************************************************************************/
+// #include "dot_product.h"
+// #include "kernels/fill_zero/fill_zero.h"
+
+// #include "core/logging.h"
+// #include "kernels/debug.h"
+// #include "kernels/kernel.h"
+// #include "kernels/binary_op/binary_op_3pipeline.h"
+
+// __nram__ char nram_buffer[MAX_NRAM_SIZE];
+
+// template <typename T>
+// __mlu_func__ void get3OffsetDotProductFast(
+//   int32_t &nram_limit, int32_t &pong_x, int32_t &pong_y,
+//   T *&nram_x, T *&nram_y, T *&nram_aux1,
+//   T *&nram_aux2, T *&nram_aux3, char *nram_buffer) {
+
+// }
+
+// template <typename T>
+// __mlu_func__ void computeDotProductFast(
+//   T *nram_x, T *nram_y, T *nram_aux1, T *nram_aux2,
+//   T *nram_aux3, int32_t actual_num, int32_t deal_num) {
+
+// }
+
+// // function implementation
+// BINARY_OP_3PIPELINE_IMPLE(DotProduct, float, Fast);
+// BINARY_OP_3PIPELINE_IMPLE(DotProduct, half, Fast);
+
+// mluOpStatus_t MLUOP_WIN_API
+// Kernel3StagePipelineDotProduct(
+//   const cnrtDim3_t k_dim, const cnrtFunctionType_t k_type,
+//   const cnrtQueue_t queue, const mluOpDataType_t d_type,
+//   const void *x, const void *y, const int32_t element_num,
+//   void *output) {
+//   // output先赋值为0,通过fill_zero中函数
+//   cnrtDim3_t tmp_k_dim;
+//   tmp_k_dim.x = 1;
+//   tmp_k_dim.y = 1;
+//   tmp_k_dim.z = 1;
+//   cnrtFunctionType_t tmp_k_type;
+//   tmp_k_type = CNRT_FUNC_TYPE_BLOCK;
+//   //
+//   if (d_type == MLUOP_DTYPE_FLOAT) {
+//     KernelFillZero(k_dim, k_type, queue, sizeof(float), output);
+//     KERNEL_CHECK(
+//         MLUBlockKernel3StagePipelineDotProductfloatFast<<<k_dim, k_type, queue>>>(
+//             (void *)x, (void *)y, output, element_num));
+//   } else if (d_type == MLUOP_DTYPE_HALF) {
+//     // half
+//     KernelFillZero(k_dim, k_type, queue, sizeof(half), output);
+//     KERNEL_CHECK(
+//         MLUBlockKernel3StagePipelineDotProducthalfFast<<<k_dim, k_type, queue>>>(
+//             (void *)x, (void *)y, output, element_num));
+//   } else {
+//     LOG(ERROR) << "Not implemented.";
+//   }
+//   return MLUOP_STATUS_SUCCESS;
+// }
