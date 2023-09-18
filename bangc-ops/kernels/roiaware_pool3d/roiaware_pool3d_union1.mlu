@@ -128,12 +128,14 @@ __mlu_entry__ void MLUMultiKernelPtsIdxOfVoxels(
     T dy = cur_roi[4];
     T dz = cur_roi[5];
     T rz = cur_roi[6];
+    T cosa = 0;
+    T sina = 0;
     if (std::is_same<T, float>::value){
-      T cosa = __cn_scalar_cos_f32(-rz);
-      T sina = __cn_scalar_sin_f32(-rz);
+      cosa = __cn_scalar_cos_f32(-rz);
+      sina = __cn_scalar_sin_f32(-rz);
     } else {
-      T cosa = __cn_scalar_cos_f16(-rz);
-      T sina = __cn_scalar_sin_f16(-rz);
+      cosa = __cn_scalar_cos_f16(-rz);
+      sina = __cn_scalar_sin_f16(-rz);
     }
 
     T dx_2 = dx / 2.0;
