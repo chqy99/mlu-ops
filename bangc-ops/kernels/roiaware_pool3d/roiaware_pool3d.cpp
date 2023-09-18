@@ -209,8 +209,10 @@ mluOpStatus_t MLUOP_WIN_API mluOpRoiawarePool3dForward(
 
   // check tensor dim
   PARAM_CHECK(API, boxes_num > 0);
+  PARAM_CHECK(API, boxes_num < 65536);
   PARAM_CHECK(API, pts_num > 0);
   PARAM_CHECK(API, channels > 0);
+  PARAM_CHECK(API, channels < 65536);
   PARAM_CHECK(API, max_pts_each_voxel > 0);
   PARAM_CHECK(API, out_x > 0);
   PARAM_CHECK(API, out_y > 0);
@@ -232,12 +234,12 @@ mluOpStatus_t MLUOP_WIN_API mluOpRoiawarePool3dForward(
   TENSOR_NUM_CHECK(API, tensor_pts_idx_of_voxels_num, LARGE_TENSOR_NUM, "");
   TENSOR_NUM_CHECK(API, tensor_pooled_features_num, LARGE_TENSOR_NUM, "");
 
-  // check zero element
-  PARAM_CHECK(API, tensor_rois_num > 0);
-  PARAM_CHECK(API, tensor_pts_num > 0);
-  PARAM_CHECK(API, tensor_pts_feature_num > 0);
-  PARAM_CHECK(API, tensor_pts_idx_of_voxels_num > 0);
-  PARAM_CHECK(API, tensor_pooled_features_num > 0);
+  // product of boxes_num and pts_num < 2^31
+  if (boxes_num > INT32_MAX / pts_num) {
+    LOG(ERROR) << API
+               << ": product of boxes_num and pts_num should less than 2^31.";
+    return MLUOP_STATUS_BAD_PARAM;
+  }
 
   // check workspace
   if (workspace_size > 0 && workspace == NULL) {
@@ -484,8 +486,10 @@ mluOpStatus_t MLUOP_WIN_API mluOpRoiawarePool3dBackward(
   const int pts_num = grad_in_desc->dims[0];
   // check tensor dim
   PARAM_CHECK(API, boxes_num > 0);
+  PARAM_CHECK(API, boxes_num < 65536);
   PARAM_CHECK(API, pts_num > 0);
   PARAM_CHECK(API, channels > 0);
+  PARAM_CHECK(API, channels < 65536);
   PARAM_CHECK(API, max_pts_each_voxel > 0);
   PARAM_CHECK(API, out_x > 0);
   PARAM_CHECK(API, out_y > 0);
@@ -504,9 +508,6 @@ mluOpStatus_t MLUOP_WIN_API mluOpRoiawarePool3dBackward(
   TENSOR_NUM_CHECK(API, tensor_grad_in_num, LARGE_TENSOR_NUM, "");
 
   // check zero element
-  PARAM_CHECK_GT(API, tensor_pts_idx_of_voxels_num, 0);
-  PARAM_CHECK_GT(API, tensor_argmax_num, 0);
-  PARAM_CHECK_GT(API, tensor_grad_out_num, 0);
   PARAM_CHECK_GT(API, tensor_grad_in_num, 0);
 
   // check ptr

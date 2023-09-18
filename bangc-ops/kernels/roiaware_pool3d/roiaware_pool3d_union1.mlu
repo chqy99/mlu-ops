@@ -166,7 +166,7 @@ __mlu_entry__ void MLUMultiKernelPtsIdxOfVoxels(
                         compute_pts_num);
       __bang_mul_scalar((T *)temp_buffer2, (T *)temp_buffer4, (T)sina,
                         compute_pts_num);
-      // local_x
+      // local_x = (X - cx) * cosa - (Y - cy) * sina
       __bang_sub((T *)local_X, (T *)temp_buffer1, (T *)temp_buffer2,
                  compute_pts_num);
       // fabs(local_x)
@@ -182,7 +182,7 @@ __mlu_entry__ void MLUMultiKernelPtsIdxOfVoxels(
                         compute_pts_num);
       __bang_mul_scalar((T *)temp_buffer2, (T *)temp_buffer4, (T)cosa,
                         compute_pts_num);
-      // local_y
+      // local_y = (X - cx) * sina + (Y - cy) * cosa
       __bang_add((T *)local_Y, (T *)temp_buffer1, (T *)temp_buffer2,
                  compute_pts_num);
       // fabs(local_y)
@@ -193,6 +193,7 @@ __mlu_entry__ void MLUMultiKernelPtsIdxOfVoxels(
       __bang_and((T *)nram_pts_in_flag, (T *)nram_pts_in_flag,
                  (T *)temp_buffer1,
                  compute_pts_num);  // flush res
+      // judge point in which poolbox
       T x_res = dx / out_x;
       T y_res = dy / out_y;
       T z_res = dz / out_z;
@@ -321,16 +322,13 @@ __mlu_entry__ void MLUMultiKernelRoiawarePool3dForward(
   int align_max_pts_each_voxel = PAD_UP(max_pts_each_voxel, align_num);
   int nram_channels_limit =
       PAD_DOWN((MAX_NRAM_SIZE - 128 -
-                align_max_pts_each_voxel * (sizeof(int) + sizeof(T))) /
+                align_max_pts_each_voxel * sizeof(int)) /
                    ((align_max_pts_each_voxel + 1) * sizeof(T) + sizeof(int)),
-               align_num);
+                align_num);
   int *nram_pts_idx_cur_voxel = (int *)data_nram;
   // nram_pts_idx_cur_voxel [align_max_pts_each_voxel]
-  T *nram_max_pts_feature_tmp =
-      (T *)((int *)nram_pts_idx_cur_voxel + align_max_pts_each_voxel);
-  // nram_max_pts_feature_tmp [align_max_pts_each_voxel]
   T *nram_pts_feature_in_voxel =
-      ((T *)nram_max_pts_feature_tmp + align_max_pts_each_voxel);
+      ((T *)nram_pts_idx_cur_voxel + align_max_pts_each_voxel);
   // nram_pts_feature_in_voxel [nram_channels_limit, align_max_pts_each_voxel]
   T *nram_pooled_features_cur_voxel =
       ((T *)nram_pts_feature_in_voxel +
@@ -392,7 +390,7 @@ __mlu_entry__ void MLUMultiKernelRoiawarePool3dForward(
           for (int k = 0; k < pts_num_cur_voxel; k++) {
             sum_val_cur_channel += static_cast<float>(
                 ((T *)nram_pts_feature_in_voxel)[channel_idx *
-                                                     align_max_pts_each_voxel +
+                                                 align_max_pts_each_voxel +
                                                  k]);
           }
           nram_pooled_features_cur_voxel[channel_idx] =
