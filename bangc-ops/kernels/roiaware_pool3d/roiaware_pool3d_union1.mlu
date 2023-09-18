@@ -128,8 +128,13 @@ __mlu_entry__ void MLUMultiKernelPtsIdxOfVoxels(
     T dy = cur_roi[4];
     T dz = cur_roi[5];
     T rz = cur_roi[6];
-    T cosa = std::cos(-rz);
-    T sina = std::sin(-rz);
+    if (std::is_same<T, float>::value){
+      T cosa = __cn_scalar_cos_f32(-rz);
+      T sina = __cn_scalar_sin_f32(-rz);
+    } else {
+      T cosa = __cn_scalar_cos_f16(-rz);
+      T sina = __cn_scalar_sin_f16(-rz);
+    }
 
     T dx_2 = dx / 2.0;
     T dy_2 = dy / 2.0;
@@ -328,7 +333,7 @@ __mlu_entry__ void MLUMultiKernelRoiawarePool3dForward(
   int *nram_pts_idx_cur_voxel = (int *)data_nram;
   // nram_pts_idx_cur_voxel [align_max_pts_each_voxel]
   T *nram_pts_feature_in_voxel =
-      ((T *)nram_pts_idx_cur_voxel + align_max_pts_each_voxel);
+      (T *)((int *)nram_pts_idx_cur_voxel + align_max_pts_each_voxel);
   // nram_pts_feature_in_voxel [nram_channels_limit, align_max_pts_each_voxel]
   T *nram_pooled_features_cur_voxel =
       ((T *)nram_pts_feature_in_voxel +
