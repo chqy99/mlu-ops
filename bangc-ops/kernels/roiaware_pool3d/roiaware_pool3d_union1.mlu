@@ -128,7 +128,7 @@ __mlu_entry__ void MLUMultiKernelPtsIdxOfVoxels(
     T dy = cur_roi[4];
     T dz = cur_roi[5];
     T rz = cur_roi[6];
-    T cosa = 0;
+    T cosa = 1;
     T sina = 0;
     if (std::is_same<T, float>::value){
       cosa = __cn_scalar_cos_f32(-rz);
