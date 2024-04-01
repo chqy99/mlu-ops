@@ -33,7 +33,7 @@ on:
       - 'requirements.txt'
       - '.github/workflows/mluops_all_system_ci.yaml'
       - '.github/workflows/daily.yaml'
-    types: [opened, synchronize, reopened, review_requested]
+    types: [opened, synchronize, reopened, review_requested, closed]
 
 jobs:
   test:
@@ -52,6 +52,7 @@ jobs:
           bash .github/ci_script/mlu-ops-ci_script.sh
 
   recheck:
+    if: github.event.pull_request.merged == true || github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
