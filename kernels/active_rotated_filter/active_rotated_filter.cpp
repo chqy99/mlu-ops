@@ -184,5 +184,6 @@ mluOpStatus_t MLUOP_WIN_API mluOpActiveRotatedFilterForward(
 
   // generate gen_case prototxt
   GEN_CASE_END();
+  int zz = 100;
   return MLUOP_STATUS_SUCCESS;
 }
