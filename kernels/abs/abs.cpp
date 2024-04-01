@@ -32,7 +32,7 @@
 
 static void policyFunc(const mluOpHandle_t &handle,
                        const mluOpTensorDescriptor_t &desc, cnrtDim3_t *k_dim,
-                       cnrtFunctionType_t *k_type) {git@github.com:ZhouxiangZhouxiang/mlu-ops.git
+                       cnrtFunctionType_t *k_type) {
   size_t dim = mluOpGetTensorElementNum(desc);
   // Union1 policyFunc
   *k_type = CNRT_FUNC_TYPE_UNION1;
@@ -65,7 +65,7 @@ mluOpStatus_t MLUOP_WIN_API mluOpAbs(mluOpHandle_t handle,
     GEN_CASE_START("abs", "ABS");
     GEN_CASE_HANDLE(handle);
     GEN_CASE_DATA(true, "x", x, x_desc, 10, 0);
-    GEN_CASE_DATA(false, "y", y, y_desc, 0, 0);git@github.com:ZhouxiangZhouxiang/mlu-ops.git
+    GEN_CASE_DATA(false, "y", y, y_desc, 0, 0);
     GEN_CASE_TEST_PARAM_NEW(true, true, false, 0.003, 0.003, 0);
   }
 
@@ -80,5 +80,5 @@ mluOpStatus_t MLUOP_WIN_API mluOpAbs(mluOpHandle_t handle,
                Kernel3StagePipelineAbs(k_dim, k_type, handle->queue,
                                        x_desc->dtype, x, y, element_num));
   GEN_CASE_END();
-  return MLUOP_STATUS_SUCCESSnot;
+  return MLUOP_STATUS_SUCCESS;
 }
