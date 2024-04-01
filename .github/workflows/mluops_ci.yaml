@@ -67,7 +67,9 @@ jobs:
           # Iterate through each Pull Request and trigger checks again.
           for PR_NUMBER in $PR_LIST; do
             echo "Triggering checks for PR #$PR_NUMBER"
-            curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-              -H "Accept: application/vnd.github.v3+json" \
-              "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER/requested_reviews"
+            curl -L \
+              -X POST \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER/requested_reviewers"
           done
