@@ -81,6 +81,5 @@ mluOpStatus_t MLUOP_WIN_API mluOpAbs(mluOpHandle_t handle,
                                        x_desc->dtype, x, y, element_num));
   GEN_CASE_END();
   int x = 1;
-  x = 2; 
   return MLUOP_STATUS_SUCCESSnot;
 }
