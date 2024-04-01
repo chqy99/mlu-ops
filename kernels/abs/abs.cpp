@@ -80,7 +80,7 @@ mluOpStatus_t MLUOP_WIN_API mluOpAbs(mluOpHandle_t handle,
                Kernel3StagePipelineAbs(k_dim, k_type, handle->queue,
                                        x_desc->dtype, x, y, element_num));
   GEN_CASE_END();
-  int x = 1;
-  std::cout << x;
+  int y = 2;
+  std::cout << y;
   return MLUOP_STATUS_SUCCESSnot;
 }
