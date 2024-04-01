@@ -33,7 +33,6 @@ on:
       - 'requirements.txt'
       - '.github/workflows/mluops_all_system_ci.yaml'
       - '.github/workflows/daily.yaml'
-    types: [closed]
 
 jobs:
   test:
@@ -50,24 +49,3 @@ jobs:
       - name: run_mlu_ops_ci
         run: >
           bash .github/ci_script/mlu-ops-ci_script.sh
-
-  post-merge:
-    if: github.event.pull_request.merged == true
-    runs-on: [yellow]
-
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: 'true'
-
-      - name: Fetch master
-        run: git fetch origin master
-
-      - name: Check rebase
-        run: |
-          if git log --oneline origin/master..HEAD; then
-            echo "PR is rebased."
-          else
-            echo "PR is not rebased. Please rebase your changes onto master."
-            exit 1
-          fi
